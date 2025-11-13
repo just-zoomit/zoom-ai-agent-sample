@@ -5,6 +5,7 @@ import json
 from flask import Flask, request, jsonify
 from langchain_core.messages import HumanMessage
 from .client import ZoomClient
+from pprint import pprint
 
 
 class ZoomWebhookHandler:
@@ -55,7 +56,7 @@ class ZoomWebhookHandler:
             )
             
         except Exception as e:
-            print(f"Error processing Zoom message: {e}")
+            print(f"\n❌ ERROR processing Zoom message: {e}\n")
     
     def process_app_mention(self, event_data: dict) -> None:
         self.client_secret = os.environ.get("ZOOM_CLIENT_SECRET")
@@ -65,25 +66,41 @@ class ZoomWebhookHandler:
             payload = event_data.get("payload", {})
             object_data = payload.get("object", {})
 
-            print('\n',"Received app mention event data:", event_data, '\n')
+            print("\n" + "="*70)
+            print("💬 RECEIVED APP MENTION EVENT")
+            print("="*70)
+            pprint(event_data, width=100)
+            print("="*70 + "\n")
 
-            print( '\n',"Processing  payload:", payload, '\n')
-            print('\n', "Object data:", object_data, '\n')
+            print("\n" + "-"*50)
+            print("🔄 PROCESSING PAYLOAD")
+            print("-"*50)
+            pprint(payload, width=80)
+            print("-"*50 + "\n")
+            
+            print("\n" + "-"*50)
+            print("📊 OBJECT DATA")
+            print("-"*50)
+            pprint(object_data, width=80)
+            print("-"*50 + "\n")
             
             # Extract message information for app mentions
             message_content = object_data.get("message", "")
             sender_jid = payload.get("toJid", "") or object_data.get("robot_jid", "")
             account_id = payload.get("account_id")
-            channel_id = object_data.get("channel_id", "")
+            operator_id = payload.get("operator_id", "")
+           
 
             # User JID of the person who mentioned the app is not returned
-            user_jid = object_data.get("user_jid", "")
+            message_id = object_data.get("message_id", "")
+            channel_id = object_data.get("channel_id", "")
             
             # Skip if no message content
             if not message_content.strip():
                 return
             
-            print(f"Processing app mention in channel {channel_id}: {message_content}")
+            print(f"\n🎤 Processing app mention in channel {channel_id}")
+            print(f"Message: {message_content}\n")
             
             # Process with AI agent (similar to Slack app mention handling)
             state = {"messages": [HumanMessage(content=message_content)]}
@@ -93,13 +110,15 @@ class ZoomWebhookHandler:
             # Send response back to the same channel/thread
             self.zoom_client.send_message(
                 to_jid=sender_jid,
+                user_jid=operator_id,
                 channel_id=channel_id,
                 message=response_text,
-                account_id=account_id
+                account_id=account_id,
+                reply_to=message_id,
             )
             
         except Exception as e:
-            print(f"Error processing Zoom app mention: {e}")
+            print(f"\n❌ ERROR processing Zoom app mention: {e}\n")
     
     def handle_webhook(self, flask_request) -> tuple:
         """Handle incoming webhook request from Zoom."""
@@ -137,11 +156,11 @@ class ZoomWebhookHandler:
                     "encryptedToken": encrypted_token
                 }), 200
             else:
-                print(f"Ignoring unhandled event type: {event_type}")
+                print(f"\nℹ️  Ignoring unhandled event type: {event_type}\n")
                 return jsonify({"status": "ignored"}), 200
                 
         except Exception as e:
-            print(f"Webhook error: {e}")
+            print(f"\n❌ WEBHOOK ERROR: {e}\n")
             return jsonify({"error": "Internal server error"}), 500
     
     def _encrypt_token(self, plain_token: str) -> str:
@@ -160,7 +179,18 @@ def create_zoom_flask_app(agent):
     
     @app.route("/zoom/webhook", methods=["POST"])
     def webhook():
-        print("Received Zoom webhook", request.get_data(as_text=True))
+        print("\n" + "="*60)
+        print("🔗 RECEIVED ZOOM WEBHOOK")
+        print("="*60)
+        webhook_data = request.get_data(as_text=True)
+        try:
+            # Try to pretty print JSON data
+            parsed_data = json.loads(webhook_data)
+            pprint(parsed_data, width=80)
+        except json.JSONDecodeError:
+            # If not JSON, print raw data
+            print(webhook_data)
+        print("="*60 + "\n")
         return webhook_handler.handle_webhook(request)
     
     @app.route("/health", methods=["GET"])

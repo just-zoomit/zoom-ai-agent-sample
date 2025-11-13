@@ -10,6 +10,7 @@ from zoom.webhook import create_zoom_flask_app
 
 import os
 import threading
+from pprint import pprint
 
 load_dotenv()
 
@@ -69,20 +70,25 @@ if ENABLE_ZOOM:
 def run_slack_bot():
     """Run Slack bot in Socket Mode."""
     if ENABLE_SLACK and slack_app:
-        print("Starting Slack bot...")
+        print("\n=== Starting Slack bot ===")
+        print()
         handler = SocketModeHandler(slack_app, app_token)
         handler.start()
 
 def run_zoom_webhook():
     """Run Zoom webhook server."""
     if ENABLE_ZOOM and zoom_app:
-        print(f"Starting Zoom webhook server on port {ZOOM_WEBHOOK_PORT}...")
+        print(f"\n=== Starting Zoom webhook server on port {ZOOM_WEBHOOK_PORT} ===")
+        print()
         zoom_app.run(host="0.0.0.0", port=ZOOM_WEBHOOK_PORT, debug=False)
 
 if __name__ == "__main__":
-    print("Starting AI Agent Bot...")
-    print(f"Slack enabled: {ENABLE_SLACK}")
-    print(f"Zoom enabled: {ENABLE_ZOOM}")
+    print("\n" + "="*50)
+    print("🤖 AI AGENT BOT STARTING")
+    print("="*50)
+    print(f"📱 Slack enabled: {ENABLE_SLACK}")
+    print(f"📹 Zoom enabled: {ENABLE_ZOOM}")
+    print("="*50 + "\n")
     
     threads = []
     
@@ -105,7 +111,9 @@ if __name__ == "__main__":
                 for thread in threads:
                     thread.join()
             except KeyboardInterrupt:
-                print("\nShutting down...")
+                print("\n" + "="*30)
+                print("🛑 SHUTTING DOWN...")
+                print("="*30 + "\n")
         else:
             # If only Zoom is enabled, run in main thread
             run_zoom_webhook()
@@ -114,6 +122,8 @@ if __name__ == "__main__":
         try:
             threads[0].join()
         except KeyboardInterrupt:
-            print("\nShutting down...")
+            print("\n" + "="*30)
+            print("🛑 SHUTTING DOWN...")
+            print("="*30 + "\n")
     else:
-        print("No bots enabled. Check your environment variables.")
+        print("\n⚠️  WARNING: No bots enabled. Check your environment variables.\n")

@@ -1,6 +1,7 @@
 import os
 import requests
 from typing import Dict, Any
+from pprint import pprint
 
 
 class ZoomClient:
@@ -38,11 +39,27 @@ class ZoomClient:
         else:
             raise Exception(f"Failed to get access token: {response.text}")
 
-    def send_message(self, to_jid: str, channel_id: str, message: str, account_id: str = None, reply_to: str = None) -> Dict[Any, Any]:
+    def send_message(self, to_jid: str, channel_id: str, user_jid: str, message: str, account_id: str = None, reply_to: str = None) -> Dict[Any, Any]:
         """Send a message to a Zoom Team Chat channel or user."""
         access_token = self.get_access_token()
+        print("\n" + "="*60)
+        print("🔑 ZOOM ACCESS TOKEN")
+        print(access_token)
+        print("="*60)
 
-        print("Sending message to Zoom JID:", to_jid, "Channel ID:", channel_id, "Message:", message, "Account ID:", account_id, "Reply to:", reply_to)
+        print("\n" + "="*60)
+        print("📱 SENDING MESSAGE TO ZOOM")
+        print("="*60)
+        message_details = {
+            "to_jid": to_jid,
+            "user_jid": user_jid,
+            "channel_id": channel_id,
+            "message": message,
+            "account_id": account_id,
+            "reply_to": reply_to
+        }
+        pprint(message_details, width=80)
+        print("="*60 + "\n")
 
         headers = {
             "Content-Type": "application/json",
@@ -50,10 +67,10 @@ class ZoomClient:
         }
         
         payload = {
-            "account_id": account_id or "",
             "robot_jid": os.environ.get("ZOOM_BOT_JID", ""),
-            "to_jid": "vbdj8euxrduts0tan29tra@xmpp.zoom.us",
-            "user_jid": "vbdj8euxrduts0tan29tra@xmpp.zoom.us",
+            "to_jid":  channel_id+"@conference.xmpp.zoom.us",
+            "user_jid": user_jid+"@xmpp.zoom.us",
+            "account_id": account_id or "",
             "content": {
                 "head": {
                     "text": "Hello World",
@@ -81,6 +98,7 @@ class ZoomClient:
                     }
                 ]
             }
+           
         }
         
         if reply_to:
