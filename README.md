@@ -54,3 +54,10 @@ Mention the bot in Slack channels or DMs to ask questions about your company. Th
 - `tools/search.py` - Vector store initialization and search functionality  
 - `docs/` - Knowledge base text files
 - `chroma_langchain_db/` - Vector database storage
+
+
+--
+
+```
+ngrok start teamchat chatbot
+```
