@@ -48,7 +48,7 @@ class ZoomClient:
         print("="*60)
 
         print("\n" + "="*60)
-        print("📱 SENDING MESSAGE TO ZOOM")
+        print("📱 SENDING MESSAGE TO ZOOM ")
         print("="*60)
         message_details = {
             "to_jid": to_jid,
