@@ -61,7 +61,7 @@ class ZoomWebhookHandler:
     def process_app_mention(self, event_data: dict) -> None:
         self.client_secret = os.environ.get("ZOOM_CLIENT_SECRET")
 
-        """Process app mention from Zoom Team Chat (similar to Slack app_mention)."""
+        """Process app mention from Zoom Team Chat."""
         try:
             payload = event_data.get("payload", {})
             object_data = payload.get("object", {})
@@ -95,14 +95,37 @@ class ZoomWebhookHandler:
             message_id = object_data.get("message_id", "")
             channel_id = object_data.get("channel_id", "")
             
+            # Handle thread messages: 
+            # If reply_main_message_id exists, this is a thread reply - use the reply_main_message_id
+            # If no reply_main_message_id, this is the start of a new thread - use message_id
+            reply_main_message_id = object_data.get("reply_main_message_id")
+            
+            # For threading: always reply to the main message ID if we're in a thread
+            if reply_main_message_id:
+                # This is a follow-up message in an existing thread
+                thread_reply_id = reply_main_message_id
+                print(f"\n🧵 THREAD REPLY: reply_main_message_id found ({reply_main_message_id})")
+                print(f"   Using reply_main_message_id to maintain thread continuity")
+                
+            else:
+                # This is the first message, future replies should thread to this message
+                thread_reply_id = message_id
+                print(f"\n🆕 NEW THREAD: No reply_main_message_id found")
+                print(f"   Starting new conversation thread with message_id {message_id}")
+            
+            print(f"📌 Threading keeps related messages grouped for better UX\n")
+            
             # Skip if no message content
             if not message_content.strip():
                 return
             
             print(f"\n🎤 Processing app mention in channel {channel_id}")
-            print(f"Message: {message_content}\n")
+            print(f"Message: {message_content}")
+            print(f"Message ID: {message_id}")
+            print(f"Reply Main Message ID: {reply_main_message_id}")
+            print(f"Replying to: {thread_reply_id}\n")
             
-            # Process with AI agent (similar to Slack app mention handling)
+            # Process with AI agent
             state = {"messages": [HumanMessage(content=message_content)]}
             response = self.agent.invoke(state)
             response_text = response["messages"][-1].content
@@ -114,7 +137,7 @@ class ZoomWebhookHandler:
                 channel_id=channel_id,
                 message=response_text,
                 account_id=account_id,
-                reply_to=message_id,
+                reply_to=thread_reply_id,
             )
             
         except Exception as e:

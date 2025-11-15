@@ -12,7 +12,6 @@ dependencies = [
     "langchain-text-splitters>=0.2.0",
     "langgraph>=0.2.0",
     "python-dotenv>=0.1.0",
-    "slack-bolt>=1.26.0",
     "flask>=3.0.0",
     "requests>=2.31.0",
 ]

@@ -1,10 +1,10 @@
-# Zoom AI Agent
+# Zoom Team Chat AI Agent
 
-A Slack bot that leverages LangChain and OpenAI to answer questions about your company using a RAG (Retrieval-Augmented Generation) system.
+A Zoom Team Chat bot that leverages LangChain and OpenAI to answer questions about your company using a RAG (Retrieval-Augmented Generation) system.
 
 ## Features
 
-- Slack integration via Socket Mode
+- Zoom Team Chat integration via webhooks
 - Vector database search using Chroma
 - Company knowledge base queries
 - OpenAI GPT-4o-mini powered responses
@@ -13,7 +13,7 @@ A Slack bot that leverages LangChain and OpenAI to answer questions about your c
 
 - Python 3.13+
 - OpenAI API key
-- Slack app with Bot Token and App Token
+- Zoom Team Chat app with webhook configuration
 - uv package manager
 
 ## Quick Start
@@ -33,8 +33,9 @@ A Slack bot that leverages LangChain and OpenAI to answer questions about your c
 3. **Configure environment variables**
    Edit `.env` with your keys:
    - `OPENAI_API_KEY` - Your OpenAI API key
-   - `SLACK_BOT_TOKEN` - Your Slack bot OAuth token (xoxb-)
-   - `SLACK_APP_TOKEN` - Your Slack app token (xoxa-)
+   - `ZOOM_CLIENT_ID` - Your Zoom app Client ID
+   - `ZOOM_CLIENT_SECRET` - Your Zoom app Client Secret
+   - `ZOOM_WEBHOOK_SECRET_TOKEN` - Your Zoom webhook secret token
 
 4. **Add knowledge base**
    Place `.txt` files in the `docs/` directory for the bot to learn from.
@@ -46,18 +47,14 @@ A Slack bot that leverages LangChain and OpenAI to answer questions about your c
 
 ## Usage
 
-Mention the bot in Slack channels or DMs to ask questions about your company. The bot will search the knowledge base and provide relevant answers.
+Mention the bot in Zoom Team Chat channels or DMs to ask questions about your company. The bot will search the knowledge base and provide relevant answers.
 
 ## Project Structure
 
-- `main.py` - Main Slack bot application
+- `main.py` - Main Zoom Team Chat bot application
+- `zoom/` - Zoom Team Chat integration modules
+  - `webhook.py` - Webhook handler for Zoom Team Chat events
+  - `client.py` - Zoom API client for sending messages
 - `tools/search.py` - Vector store initialization and search functionality  
 - `docs/` - Knowledge base text files
 - `chroma_langchain_db/` - Vector database storage
-
-
---
-
-```
-ngrok start teamchat chatbot
-```
